@@ -34,7 +34,7 @@ A TypeScript plugin enables developers to customize the order of auto-import sug
     }
     ```
 
-- Config your Editor or IDE to use the TypeScript from node_modules (i.e. *Use Workspace Version* in VSCode), otherwise TypeScript won't be able to load the plugin
+- Config your Editor or IDE to use the TypeScript from node_modules (i.e. *Use Workspace Version* in VSCode from *TypeScript and JavaScript Language Features* Extension), otherwise TypeScript won't be able to load the plugin
     - <img width="500" src="./assets/select-typescript-version.png" alt="select typescript version">
     - <img width="500" src="./assets/use-workspace-version.png" alt="use workspace version">
 
