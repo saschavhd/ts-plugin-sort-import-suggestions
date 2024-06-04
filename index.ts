@@ -12,15 +12,15 @@ function init(modules: {
     ];
     const moveDownPatterns: string[] = info.config.moveDownPatterns ?? [];
     const moveUpRegexes: RegExp[] = moveUpPatterns.map(
-      (pattern) => new RegExp(pattern),
+      (pattern) => new RegExp(pattern)
     );
     const moveDownRegexes: RegExp[] = moveDownPatterns.map(
-      (pattern) => new RegExp(pattern),
+      (pattern) => new RegExp(pattern)
     );
 
     // Diagnostic logging
     info.project.projectService.logger.info(
-      "TSSortImportSuggestionsPlugin: Started",
+      "TSSortImportSuggestionsPlugin: Started"
     );
 
     // Set up decorator object
@@ -44,7 +44,7 @@ function init(modules: {
         fileName,
         position,
         options,
-        ...restArgs,
+        ...restArgs
       );
       if (!prior) return;
 
@@ -76,7 +76,7 @@ function init(modules: {
       end: number,
       errorCodes: readonly number[],
       formatOptions: ts.FormatCodeSettings,
-      preferences: ts.UserPreferences,
+      preferences: ts.UserPreferences
     ) => {
       const prior = info.languageService.getCodeFixesAtPosition(
         fileName,
@@ -84,22 +84,54 @@ function init(modules: {
         end,
         errorCodes,
         formatOptions,
-        preferences,
+        preferences
       );
       const newFixes = [...prior].sort((a, b) => {
         const aSort = moveUpRegexes.some((re) => re.test(a.description))
           ? -1
           : moveDownRegexes.some((re) => re.test(a.description))
-            ? 1
-            : 0;
+          ? 1
+          : 0;
         const bSort = moveUpRegexes.some((re) => re.test(b.description))
           ? -1
           : moveDownRegexes.some((re) => re.test(b.description))
-            ? 1
-            : 0;
+          ? 1
+          : 0;
         return aSort - bSort;
       });
       return newFixes;
+    };
+
+    // Override getCombinedCodeFix
+    proxy.getCombinedCodeFix = (
+      scope: ts.CombinedCodeFixScope,
+      fixId: {},
+      formatOptions: ts.FormatCodeSettings,
+      preferences: ts.UserPreferences
+    ) => {
+      const prior = info.languageService.getCombinedCodeFix(
+        scope,
+        fixId,
+        formatOptions,
+        preferences
+      );
+      if (!prior) return prior;
+
+      prior.changes = prior.changes.toSorted((a, b) => {
+        const aSort = moveUpRegexes.some((re) => re.test(a.fileName))
+          ? -1
+          : moveDownRegexes.some((re) => re.test(a.fileName))
+          ? 1
+          : 0;
+        const bSort = moveUpRegexes.some((re) => re.test(b.fileName))
+          ? -1
+          : moveDownRegexes.some((re) => re.test(b.fileName))
+          ? 1
+          : 0;
+        return aSort - bSort;
+      });
+
+      return prior;
     };
 
     return proxy;
